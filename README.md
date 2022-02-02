@@ -1,4 +1,4 @@
-# eycms是一款用nodejs写的一款小程序商城管理小管理
+# 语音转换精灵是一款用nodejs写的一款小程序商城管理小管理
 
 #### 介绍
 vue2+webpark+elemeUI开发后台管理
