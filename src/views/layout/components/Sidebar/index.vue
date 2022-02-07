@@ -2,8 +2,8 @@
   <div class="_sidebar">
     <div class="logo" @click="handleIndex">
       <img src="/images/logo.png" width="30" /><span class="_logo_zi"
-        ><span>E</span><span>Y</span><span>S</span><span>O</span><span>H</span
-        ><span>P</span></span
+        ><span>Y</span><span>U</span><span>N</span><span>Z</span><span>H</span
+        ><span>I</span></span
       >
     </div>
     <scroll-bar>

@@ -26,23 +26,24 @@
           </el-form-item>
           <el-form-item label="缩略图" prop="img_path">
             <upload
-              v-model="projectInfo.thumbnail"
+              v-model="projectThumbnail"
               :file-data="uploadData"
               @upload-success="upload_success"
             >
               <img
-                :src="projectInfo.thumbnail"
-                v-if="projectInfo.thumbnail"
+                :src="projectThumbnail"
+                v-if="projectThumbnail"
                 class="avatar"
               />
-              <i class="el-icon-plus" v-if="!projectInfo.thumbnail"></i>
+              <i class="el-icon-plus" v-if="!projectThumbnail"></i>
             </upload>
           </el-form-item>
           <el-form-item label="内容详情" prop="content">
             <ueditor
-              v-model="projectInfo.content"
+              v-model="projectInfoContent"
               :config="config"
               @ready="thumbReady"
+              @markdownChange="markdownChange"
               :goods-thumb-list="goodsThumbList"
             ></ueditor>
           </el-form-item>
@@ -60,6 +61,7 @@
 <script>
 import ueditor from "@/components/Editor";
 import Service from "@/api/service";
+import Request from "@/api/request";
 import Upload from "@/components/Upload";
 import { mapGetters } from "vuex";
 export default {
@@ -67,7 +69,7 @@ export default {
   data() {
     return {
       goodsPath: "",
-      uploadUrl: "/api/system/upload",
+      uploadUrl: "/api/admin/system/fileUpload",
       preview: {},
       imageMogr_750:
         "imageMogr2/auto-orient/thumbnail/750x/blur/1x0/quality/75|imageslim",
@@ -76,6 +78,7 @@ export default {
       spceDialogVisible: false,
       colorDialogVisible: false,
       thumbnail: "picture",
+      projectThumbnail: "",
       uploadData: {
         serverUrl: process.env.VUE_APP_SERVER_URL,
         isMultiSelect: false,
@@ -85,14 +88,13 @@ export default {
       fileList: [], // 商品组图存放
       imgPathList: [], // 图片存放
       goodsThumbList: [], // 商品详情图片存放
+      projectInfoContent: "", //存放内容
       projectInfo: {
         name: "",
         describe: "",
         content: "",
-        poasword: "",
-        goodsThumbId: "",
-        thumbnail: "",
-        thumbId: "",
+        contentImageId: "",
+        thumbnailId: "",
       },
       config: {
         initialFrameWidth: 1200,
@@ -112,15 +114,15 @@ export default {
       if (val) {
         const _state = this.$route.params.name;
         if (_state === "add") {
-          this.$set(this.articleInfo, "name", "");
-          this.$set(this.articleInfo, "content", "");
-          this.$set(this.articleInfo, "describe", "");
-          this.$set(this.articleInfo, "thumbId", null);
-          this.$set(this.articleInfo, "thumbnail", "");
-          this.$set(this.articleInfo, "thumbId", "");
+          this.$set(this.projectInfo, "name", "");
+          this.$set(this.projectInfo, "content", "");
+          this.$set(this.projectInfo, "describe", "");
+          this.$set(this.projectInfo, "thumbnailId", null);
+          this.$set(this.projectInfo, "contentImageId", null);
+          this.$set(this.projectInfo, "markdownContent", "");
           this.$set(this.uploadData, "mid", "");
+          this.$set(this, "projectThumbnail", "");
           this.$set(this, "goodsThumbList", []);
-          this.$set(this, "color", []);
         }
         this.getData();
       }
@@ -134,7 +136,7 @@ export default {
       return this.$route.params.name || _name;
     },
     moduleService() {
-      const servicePath = "/api/pages/project";
+      const servicePath = "/api/admin/project";
       return new Service(servicePath);
     },
   },
@@ -152,6 +154,36 @@ export default {
   },
 
   methods: {
+    markdownChange(html) {
+      this.$set(this.projectInfo, "content", html);
+    },
+    imgAdd(pos, $file) {
+      let formdata = new FormData();
+      if (this.projectInfo.contentImageId) {
+        formdata.mid = this.projectInfo.contentImageId._id;
+      }
+      formdata.append("file", $file);
+      Request.post({
+        url: "/api/admin/system/fileUpload",
+        params: formdata,
+      }).then((res) => {
+        console.log(res.data.fileName);
+        this.$refs.mavonEditor.$img2Url(pos, res.data.fileUrl);
+        this.$set(this.projectInfo, "contentImageId", res.data.mid);
+      });
+    },
+    imgDel(pos) {
+      const options = {
+        name: pos[0].replace(/^(.*)\/([^/]*)$/, "$2"),
+        mid: this.projectInfo.contentImageId,
+      };
+      Request.post({
+        url: "/api/admin/system/fileDelete",
+        params: options,
+      }).then((res) => {
+        this.$message.success("删除成功");
+      });
+    },
     getData() {
       const _state = this.$route.params.name || this.paramsName;
       if (_state === "update") {
@@ -159,48 +191,57 @@ export default {
           const result = res.data;
           this.$set(this.projectInfo, "name", result.name);
           this.$set(this.projectInfo, "describe", result.describe);
-          this.$set(this.projectInfo, "content", result.content);
-          this.$set(this.projectInfo, "categoryArr", result.categoryArr);
-          this.$set(this.projectInfo, "thumbnail", result.thumbnail);
+
+          // 初始化
+          this.projectInfoContent =
+            this.SYS.setup.edit_type === "2"
+              ? result.markdownContent
+              : result.content;
           // 产品图片集初始化
-          if (result.thumbId) {
-            this.$set(this.projectInfo, "thumbId", result.thumbId._id);
-            this.$set(this.uploadData, "mid", result.thumbId._id);
+          if (result.thumbnailId) {
+            this.$set(this.projectInfo, "thumbnailId", result.thumbnailId._id);
+            this.$set(
+              this,
+              "projectThumbnail",
+              result.thumbnailId.imgPath[0].url
+            );
           }
           // 详情图片初始化
-          if (result.goodsThumbId) {
+          if (result.contentImageId) {
             this.$set(
               this.projectInfo,
-              "goodsThumbId",
-              result.goodsThumbId._id
+              "contentImageId",
+              result.contentImageId._id
             );
             this.$set(this.config, "imageMogr", this.imageMogr_750);
-            this.$set(this.config, "mid", result.goodsThumbId._id);
-            this.goodsThumbList = result.goodsThumbId.imgPath;
+            this.$set(this.config, "mid", result.contentImageId._id);
+            this.goodsThumbList = result.contentImageId.imgPath.map((item) => {
+              return {
+                file: item.url,
+                name: item.name,
+                mid: result.contentImageId._id,
+              };
+            });
+            console.log(this.goodsThumbList);
           }
         });
       }
     },
     upload_success(val) {
-      this.$set(this.projectInfo, "thumbId", val.mid);
+      this.$set(this.projectInfo, "thumbnailId", val.mid);
     },
-    handleRemove(file, fileList) {
-      const options = {
-        files: {
-          name: file.name,
-          url: file.url,
-        },
-        _id: this.projectInfo.thumbId,
-      };
-      this.moduleService.thumbnailDelete(options).then((res) => {
-        this.$message.success("删除成功");
-      });
-    },
+
     submitSave(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           const state = this.$route.params.name || this.paramsName;
-          this.projectInfo.id = this.$route.query.id || "";
+          this.projectInfo._id = this.$route.query.id || "";
+          this.$set(
+            this.projectInfo,
+            this.SYS.setup.edit_type === "1" ? "content" : "markdownContent",
+            this.projectInfoContent
+          );
+
           this.moduleService[state](this.projectInfo).then((res) => {
             this.$message.success(state === "add" ? "添加成功" : "更新成功");
             this.dialogVisible = false;
@@ -212,7 +253,7 @@ export default {
       });
     },
     thumbReady(val) {
-      this.projectInfo.goodsThumbId = val;
+      this.projectInfo.contentImageId = val;
     },
     brak() {
       this.$router.push({

@@ -158,11 +158,7 @@
               :closable="!item.isLock"
               @close="handleClose(item)"
             >
-              <el-checkbox
-                :label="item._id"
-                @change="changeBtnList(item, key)"
-                >{{ item.btnName }}</el-checkbox
-              >
+              <el-checkbox :label="item._id">{{ item.btnName }}</el-checkbox>
             </el-tag>
           </el-checkbox-group>
           <div class="input">
@@ -300,11 +296,12 @@ export default {
     initForm(row) {
       this._id = row._id;
       if (row.btnListArr && row.btnListArr.length > 0) {
-        this.btnListArr = row.btnListArr.map((item) => item._id);
+        this.btnListArr = row.btnListArr.map((item) => item.btnId);
       }
       this.setFormVal(row);
     },
     FormClear() {
+      this.btnListArr = [];
       var form = {
         name: "",
         parentId: "-1",
@@ -323,15 +320,15 @@ export default {
       };
       this.setFormVal(form);
     },
-    changeBtnList(data, index) {
-      var isChange =
-        this.btnListArr.findIndex((item) => item === data._id) > -1;
-      if (isChange) {
-        this.form.btnListArr.splice(index, 0, data);
-      } else {
-        this.form.btnListArr.splice(index, 1);
-      }
-    },
+    // changeBtnList(data, index) {
+    //   var isChange =
+    //     this.btnListArr.findIndex((item) => item === data._id) > -1;
+    //   if (isChange) {
+    //     this.form.btnListArr.splice(index, 0, data);
+    //   } else {
+    //     this.form.btnListArr.splice(index, 1);
+    //   }
+    // },
     showInput() {
       if (!this.inputVisible) {
         this.inputVisible = true;
@@ -389,6 +386,13 @@ export default {
       });
     },
     submitData() {
+      // 查找id
+      this.form.btnListArr = [];
+      this.btnListArr.map((_item) => {
+        var resItem = this.btnList.find((item) => item._id === _item);
+        this.form.btnListArr.push(resItem);
+      });
+
       if (this.dialogState === "create") {
         delete this.form._id;
       } else {

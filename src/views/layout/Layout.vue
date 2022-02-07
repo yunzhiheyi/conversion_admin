@@ -45,7 +45,7 @@ export default {
   right: 0;
   top: 0;
   left: 180px;
-  z-index: 99;
+  z-index: 999;
   transition: left 0.3s;
   .logo {
     position: absolute;

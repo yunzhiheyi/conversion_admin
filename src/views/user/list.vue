@@ -1,5 +1,20 @@
 <template>
   <div class="app-container">
+    <div class="table-form">
+      <el-form :inline="true" class="demo-form-inline">
+        <el-form-item>
+          <el-input
+            type="input"
+            placeholder="请输入手机号"
+            v-model="search_order_sn"
+            clearable
+          ></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="_search" type="primary">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
     <div class="_list" style="margin-top: 15px">
       <el-table
         highlight-current-row

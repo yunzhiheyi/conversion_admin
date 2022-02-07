@@ -1,9 +1,7 @@
 import { errorRouterMap, defaultRouterMap } from "@/router";
 import componentConfig from "@/utils/config.view.router";
-
 // 设置权限路由
 const GENERATE_ROUTERS = "permission/GENERATE_ROUTERS";
-
 // 设置权限路由
 const GENERATE_SIDEBARMENU = "permission/GENERATE_SIDEBARMENU";
 // 清除权限路由
@@ -59,7 +57,7 @@ function filterAsyncRouter(tree) {
     if (item.btnListArr && item.btnListArr.length > 0) {
       item.btnListArr.map((res, index) => {
         if (res.btnId && res._id) {
-          _options["btnList"][res.btnId] = res._id;
+          _options["btnList"][res.label] = res._id;
         }
       });
     }
@@ -125,6 +123,7 @@ const actions = {
     return new Promise((resolve) => {
       const accessedRouters = filterAsyncRouter(tree);
       const accessedMenu = filterAsyncMenu(tree);
+      console.log(accessedRouters);
       commit(GENERATE_ROUTERS, accessedRouters);
       commit(GENERATE_SIDEBARMENU, accessedMenu);
       resolve();

@@ -5,6 +5,8 @@
     :style="{ width: `${width}px`, height: `${height}px` }"
     :action="uploadUrl"
     :show-file-list="false"
+    :headers="headers"
+    :on-change="onChange"
     :on-success="uploadSuccess"
     :on-error="uploadError"
   >
@@ -12,6 +14,7 @@
   </el-upload>
 </template>
 <script>
+import { getToken } from "@/utils/auth"; // 验权
 export default {
   name: "Upload",
   props: {
@@ -43,15 +46,21 @@ export default {
   },
   data() {
     return {
-      uploadUrl: "/api/system/upload",
+      uploadUrl: "/api/admin/system/fileUpload",
+      headers: {
+        authorization: getToken(),
+      },
     };
   },
   methods: {
+    onChange(file, fileList) {
+      console.log(file, fileList);
+    },
     uploadSuccess(response, file, fileList) {
-      this.imgUrl = response.data.file;
+      this.imgUrl = response.data.fileUrl;
       this.$emit("upload-success", {
         mid: response.data.mid,
-        fileUrl: response.data.file,
+        fileUrl: response.data.fileUrl,
       }); // 将图片地址和图片ID返回
       this.$message.success("上传成功");
     },

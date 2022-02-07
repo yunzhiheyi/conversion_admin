@@ -3,7 +3,11 @@
   <div
     class="editor"
     v-loading="quillUpdateImg"
-    :style="`width:${config.initialFrameWidth}px`"
+    :style="
+      SYS.setup.edit_type === '1'
+        ? 'width:' + config.initialFrameWidth + 'px'
+        : ''
+    "
   >
     <!-- 图片上传组件辅助-->
     <el-upload
@@ -11,13 +15,49 @@
       style="position: absolute; visibility: hidden"
       :data="uploadData"
       :action="serverUrl"
+      :on-change="onChange"
       :show-file-list="false"
+      :headers="headers"
       :on-success="upload_Success"
       :on-error="upload_Error"
       :before-upload="beforeUpload"
     >
     </el-upload>
-    <div ref="editor"></div>
+    <div ref="editor" v-if="SYS.setup.edit_type === '1'"></div>
+    <mavon-editor
+      ref="mavonEditor"
+      v-model="content"
+      :ishljs="true"
+      @imgAdd="imgAdd"
+      @imgDel="imgDel"
+      style="height: 550px"
+      @change="markdownChange"
+      :toolbars="toolbars"
+      v-if="SYS.setup.edit_type === '2'"
+    >
+      <!-- 添加图片 -->
+      <template slot="left-toolbar-before">
+        <button
+          type="button"
+          @click="changeImage"
+          class="op-icon fa fa-mavon-picture-o"
+          aria-hidden="true"
+          title="图片"
+        ></button>
+      </template>
+      <!-- 图片列表 -->
+      <template slot="left-toolbar-before">
+        <button
+          type="button"
+          @click="changeImagesList"
+          class="op-icon icon-multiple"
+          aria-hidden="true"
+          title="图片列表"
+        >
+          <svg-icon icon-class="multiple" style="font-size: 11.5px"></svg-icon>
+        </button>
+      </template>
+    </mavon-editor>
     <el-dialog
       title="图片管理"
       :visible.sync="dialogVisible"
@@ -25,9 +65,10 @@
       top="5vh"
     >
       <div class="dialog-upload-list">
-        <p class="red">
-          此处图片管理仅限于删除数据库、七牛云图，不对图片的插入进行操作
-        </p>
+        <!-- <p class="red">
+          图片管理仅限于删除数据库、七牛云图
+        </p> -->
+        <div class="nodata" v-if="!goodsThumbList.length">暂时图片无数据</div>
         <ul class="el-upload-list el-upload-list--picture">
           <li
             v-for="(item, index) in goodsThumbList"
@@ -35,13 +76,14 @@
             :key="index"
           >
             <img
-              :src="item.url"
+              :src="item.file"
               :alt="`${item.name}`"
+              @click="setEditorImage(item)"
               class="el-upload-list__item-thumbnail"
             />
             <label class="el-upload-list__item-status-label"
               ><i class="el-icon-upload-success el-icon-check"></i></label
-            ><i class="el-icon-close" @click="handleRemove(item)"></i>
+            ><i class="el-icon-close" @click="handleRemove(item, index)"></i>
           </li>
         </ul>
       </div>
@@ -68,18 +110,57 @@
 </template>
 <script>
 import Service from "@/api/service";
+import Request from "@/api/request";
+import { getToken } from "@/utils/auth"; // 验权
+import { mapGetters } from "vuex";
 export default {
   data() {
     return {
       editor: null,
       quillUpdateImg: false,
-      serverUrl: "/api/system/upload",
+      serverUrl: "/api/admin/system/fileUpload",
       id: "ueditorId",
       isFocus: false,
       dialogVisible: false,
       dialogVisibleCode: false,
       insertcodeValue: "",
       uploadData: {},
+      headers: {
+        authorization: getToken(),
+      },
+      toolbars: {
+        bold: true, // 粗体
+        italic: true, // 斜体
+        header: true, // 标题
+        underline: true, // 下划线
+        strikethrough: true, // 中划线
+        mark: true, // 标记
+        superscript: true, // 上角标
+        subscript: true, // 下角标
+        quote: true, // 引用
+        ol: true, // 有序列表
+        ul: true, // 无序列表
+        link: true, // 链接
+        code: true, // code
+        table: true, // 表格
+        fullscreen: true, // 全屏编辑
+        readmodel: true, // 沉浸式阅读
+        htmlcode: true, // 展示html源码
+        /* 1.3.5 */
+        undo: true, // 上一步
+        redo: true, // 下一步
+        trash: true, // 清空
+        save: true, // 保存（触发events中的save事件）
+        /* 1.4.2 */
+        navigation: true, // 导航目录
+        /* 2.1.8 */
+        alignleft: true, // 左对齐
+        aligncenter: true, // 居中
+        alignright: true, // 右对齐
+        /* 2.2.1 */
+        subfield: true, // 单双栏模式
+        preview: true, // 预览
+      },
     };
   },
   props: {
@@ -96,6 +177,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(["SYS"]),
     content: {
       get: function () {
         return this.value;
@@ -151,37 +233,53 @@ export default {
   watch: {
     value: function (val) {
       if (val !== null) {
-        this.editor.setContent(val);
+        this.editor && this.editor.setContent(val);
         // this.replaceHtmlCode()
       }
     },
   },
   destroyed() {
-    this.editor.destroy();
+    this.editor && this.editor.destroy();
   },
   mounted() {
     var _this = this;
-    _this.$refs.editor.id = _this.id;
-    _this.editor = window.UM.getEditor(_this.id, _this.config);
-    _this.$nextTick(function () {
-      _this.editor.ready(
-        function () {
-          const bodyJson = {
-            content: "",
-            plainTxt: "",
-          };
-          this.editor.addListener("contentChange", function () {
-            bodyJson.content = _this.editor.getContent();
-            bodyJson.plainTxt = _this.editor.getPlainTxt();
-          });
-          this.editor.addListener("blur", function () {
-            _this.content = bodyJson.content;
-          });
-        }.bind(this)
-      );
-    });
+    // 编辑器切换
+    if (this.SYS.setup.edit_type === "1") {
+      _this.$refs.editor.id = _this.id;
+      _this.editor = window.UM.getEditor(_this.id, _this.config);
+      _this.$nextTick(function () {
+        _this.editor.ready(
+          function () {
+            const bodyJson = {
+              content: "",
+              plainTxt: "",
+            };
+            this.editor.addListener("contentChange", function () {
+              bodyJson.content = _this.editor.getContent();
+              bodyJson.plainTxt = _this.editor.getPlainTxt();
+            });
+            this.editor.addListener("blur", function () {
+              _this.content = bodyJson.content;
+            });
+          }.bind(this)
+        );
+      });
+    }
   },
   methods: {
+    onChange(file, fileList) {
+      this.uploadData.mid = this.config.mid;
+    },
+    changeImage() {
+      document.querySelector(".j-upload .el-upload").click();
+    },
+    changeImagesList() {
+      this.dialogVisible = true;
+    },
+    // markdown语法
+    markdownChange(value, html) {
+      this.$emit("markdownChange", html);
+    },
     submitCode() {
       if (!this.insertcodeValue) {
         this.$message.warning("插入代码不能为空");
@@ -193,17 +291,17 @@ export default {
         this.dialogVisibleCode = false;
       }
     },
-    handleRemove(file) {
+    handleRemove(dataFile, index) {
       const options = {
-        files: {
-          name: file.name,
-          url: file.url,
-        },
-        _id: this.config.mid,
+        name: dataFile.name,
+        mid: dataFile.mid,
       };
-      this.goodsThumbList.splice(options.files, 1);
-      this.moduleService.thumbnailDelete(options).then((res) => {
+      Request.post({
+        url: "/api/admin/system/fileDelete",
+        params: options,
+      }).then((res) => {
         this.$message.success("删除成功");
+        this.goodsThumbList.splice(index, 1);
       });
     },
     // 图片上传前
@@ -211,17 +309,43 @@ export default {
       // 显示loading动画
       this.quillUpdateImg = true;
     },
-    upload_Success(res, file) {
-      const _data = res.data;
-      // 如果上传成功
-      if (_data !== null) {
+    setEditorImage(_data) {
+      if (this.SYS.setup.edit_type === "1") {
         this.editor.focus();
         this.editor.setContent(
           `<img src="${_data.file}" style="max-width:100%;height:auto;"/>`,
           true
         );
-        this.uploadData.mid = _data.mid;
-        this.goodsThumbList.push(_data.files[0]);
+      } else {
+        var $vm = this.$refs.mavonEditor;
+        $vm.textAreaFocus();
+        $vm.insertText($vm.getTextareaDom(), {
+          prefix: "![" + _data.name + "](" + _data.file + ")",
+          subfix: "",
+          str: "",
+        });
+      }
+      this.uploadData.mid = _data.mid;
+    },
+    imgAdd(pos, file) {
+      console.log(pos, file);
+    },
+    imgDel(pos, file) {
+      console.log(pos, file);
+    },
+    upload_Success(res, file) {
+      const _data = {
+        mid: res.data.mid,
+        file: res.data.fileUrl,
+        name: res.data.fileName,
+      };
+      if (_data !== null) {
+        this.setEditorImage(_data);
+        this.goodsThumbList.push({
+          mid: _data.mid,
+          file: _data.file,
+          name: _data.name,
+        });
         this.$emit("ready", _data.mid);
       } else {
         this.$message.error("图片上传失败");
@@ -249,11 +373,17 @@ export default {
   p.red {
     color: red;
   }
+  .nodata {
+    line-height: 100px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+  }
   .el-upload-list {
     margin-left: -8px;
   }
   .el-upload-list__item {
-    width: 100px;
+    width: 102px;
     margin-left: 11px;
   }
   .el-upload-list--picture .el-upload-list__item-thumbnail {
@@ -290,5 +420,8 @@ export default {
 
 .edui-editor-body .edui-body-container p {
   margin: 0;
+}
+.icon-multiple {
+  vertical-align: middle;
 }
 </style>

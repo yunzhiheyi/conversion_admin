@@ -18,14 +18,14 @@
         v-loading.body="listLoading"
       >
         <el-table-column type="selection" width="55"> </el-table-column>
-        <el-table-column label="专题名称" width="480">
-          <template slot-scope="scope">
-            {{ scope.row.name }}
-          </template>
-        </el-table-column>
         <el-table-column label="ID">
           <template slot-scope="scope">
             {{ scope.row._id }}
+          </template>
+        </el-table-column>
+        <el-table-column label="专题名称">
+          <template slot-scope="scope">
+            {{ scope.row.name }}
           </template>
         </el-table-column>
         <el-table-column label="专题介绍">
@@ -90,7 +90,7 @@ export default {
   mixins: [mixinsTable],
   data() {
     return {
-      servicePath: "/api/pages/project",
+      servicePath: "/api/admin/project",
     };
   },
   components: {
