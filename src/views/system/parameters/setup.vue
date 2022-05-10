@@ -90,6 +90,14 @@
         </el-radio-group>
         <div class="tis">开启支付宝支付,填写配置</div>
       </el-form-item>
+      <el-form-item label="白名单" prop="copyright">
+        <el-input
+          type="textarea"
+          style="width: 400px; float: left; margin-right: 20px"
+          v-model="form.whiteUser"
+        ></el-input>
+        <div class="tis">手机号验证白名单</div>
+      </el-form-item>
       <el-form-item label="微信号" prop="kefu">
         <el-input
           type="input"
@@ -160,6 +168,7 @@ export default {
           label: "Makdown",
         },
       ],
+      whiteUser: "",
       colse_type_all: [
         {
           value: "0",

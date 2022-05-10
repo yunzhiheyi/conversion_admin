@@ -1,11 +1,7 @@
 <template>
   <div id="app">
     <router-view></router-view>
-    <!-- <notification></notification>
-    <editpassword></editpassword> -->
-    <!-- <audio id="failpay">
-      <source src="/images/msg_1.mp3" type="audio/mpeg" />
-    </audio> -->
+    <editpassword></editpassword>
   </div>
 </template>
 <script>

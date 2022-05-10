@@ -65,9 +65,6 @@
       top="5vh"
     >
       <div class="dialog-upload-list">
-        <!-- <p class="red">
-          图片管理仅限于删除数据库、七牛云图
-        </p> -->
         <div class="nodata" v-if="!goodsThumbList.length">暂时图片无数据</div>
         <ul class="el-upload-list el-upload-list--picture">
           <li
@@ -239,7 +236,9 @@ export default {
     },
   },
   destroyed() {
-    this.editor && this.editor.destroy();
+    setTimeout(() => {
+      this.editor && this.editor.destroy();
+    }, 300);
   },
   mounted() {
     var _this = this;
@@ -268,7 +267,9 @@ export default {
   },
   methods: {
     onChange(file, fileList) {
-      this.uploadData.mid = this.config.mid;
+      if (this.config.mid) {
+        this.uploadData.mid = this.config.mid;
+      }
     },
     changeImage() {
       document.querySelector(".j-upload .el-upload").click();
@@ -300,8 +301,10 @@ export default {
         url: "/api/admin/system/fileDelete",
         params: options,
       }).then((res) => {
-        this.$message.success("删除成功");
-        this.goodsThumbList.splice(index, 1);
+        if (res.data) {
+          this.$message.success("删除成功");
+          this.goodsThumbList.splice(index, 1);
+        }
       });
     },
     // 图片上传前
@@ -320,7 +323,7 @@ export default {
         var $vm = this.$refs.mavonEditor;
         $vm.textAreaFocus();
         $vm.insertText($vm.getTextareaDom(), {
-          prefix: "![" + _data.name + "](" + _data.file + ")",
+          prefix: "![" + _data.name + "](" + _data.file + ")\n",
           subfix: "",
           str: "",
         });

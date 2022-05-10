@@ -123,7 +123,6 @@ const actions = {
     return new Promise((resolve) => {
       const accessedRouters = filterAsyncRouter(tree);
       const accessedMenu = filterAsyncMenu(tree);
-      console.log(accessedRouters);
       commit(GENERATE_ROUTERS, accessedRouters);
       commit(GENERATE_SIDEBARMENU, accessedMenu);
       resolve();

@@ -29,6 +29,11 @@
           <el-button @click="_search" type="primary">搜索</el-button>
         </el-form-item>
       </el-form>
+      <div>
+        <el-button @click="openDrawerVisible" type="success"
+          >价格管理</el-button
+        >
+      </div>
     </div>
     <div class="_list order">
       <el-table
@@ -173,19 +178,20 @@
         </el-pagination>
       </div>
     </div>
-    <order-details v-model="dialogVisible" :details="details"></order-details>
-    <shipping
-      v-model="shippingDialogVisible"
-      :isShipping="isShipping"
-      v-if="shippingDialogVisible"
-    ></shipping>
+    <el-drawer
+      :append-to-body="true"
+      :visible.sync="drawerVisible"
+      :with-header="false"
+      size="60%"
+    >
+      <drawer-price />
+    </el-drawer>
   </div>
 </template>
 <script>
 import mixinsTable from "@/utils/mixins.table";
-import orderDetails from "./details";
-import shipping from "./shipping";
 import { mapGetters } from "vuex";
+import DrawerPrice from "@/components/DrawerPrice";
 export default {
   name: "orderList",
   mixins: [mixinsTable],
@@ -194,6 +200,7 @@ export default {
       servicePath: "/api/admin/order",
       search_order_sn: "",
       isShipping: false,
+      drawerVisible: false,
       shipping_info: {},
       details: {
         order_goods: {},
@@ -219,8 +226,7 @@ export default {
     ...mapGetters(["msgData"]),
   },
   components: {
-    orderDetails,
-    shipping,
+    DrawerPrice,
   },
   watch: {
     msgData: function (data, oldVal) {
@@ -258,6 +264,9 @@ export default {
     },
     handleCurrentChange(val) {
       this.getList(val);
+    },
+    openDrawerVisible() {
+      this.drawerVisible = true;
     },
     initForm(row) {
       this.$set(this.details, "order_goods", row.order_goods);
@@ -324,6 +333,8 @@ export default {
 }
 .table-form {
   padding: 15px 0 0 0;
+  display: flex;
+  justify-content: space-between;
   .el-form-item--small.el-form-item {
     margin-bottom: 15px;
   }

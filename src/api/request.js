@@ -1,7 +1,6 @@
 import request from "@/utils/axios";
 export default {
   post(options) {
-    console.log(options);
     var data = {
       url: options.url,
       method: "post",

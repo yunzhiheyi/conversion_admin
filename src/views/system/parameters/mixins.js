@@ -44,6 +44,8 @@ export default {
     submitInfo(formName, form) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          this.form.whiteUser =
+            this.form.whiteUser && this.form.whiteUser.split(",");
           this.moduleService["add"](form).then((res) => {
             this.$message.success("操作成功");
             this.$store.dispatch("setSysInfo", this.form);

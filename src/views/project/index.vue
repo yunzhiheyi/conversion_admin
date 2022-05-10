@@ -23,12 +23,12 @@
             {{ scope.row._id }}
           </template>
         </el-table-column>
-        <el-table-column label="专题名称">
+        <el-table-column label="单页名称">
           <template slot-scope="scope">
             {{ scope.row.name }}
           </template>
         </el-table-column>
-        <el-table-column label="专题介绍">
+        <el-table-column label="单页介绍">
           <template slot-scope="scope">
             {{ scope.row.describe }}
           </template>

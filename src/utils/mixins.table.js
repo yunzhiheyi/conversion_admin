@@ -63,6 +63,9 @@ export default {
       this.isDisabled = false;
       this.FormClear();
     },
+    handleCurrentChange(val) {
+      this.getList(val);
+    },
     handleDelete(row) {
       this.$confirm("确认删除该记录吗？", "提示", { type: "warning" }).then(
         () => {

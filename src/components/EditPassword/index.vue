@@ -42,7 +42,7 @@ export default {
       }
     }
     return {
-      servicePath: '/api/system/user',
+      servicePath: '/api/admin/user',
       apassword: '',
       form: {
         _id: '',

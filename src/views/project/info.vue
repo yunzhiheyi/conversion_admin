@@ -8,18 +8,18 @@
           ref="projectInfo"
           label-width="120px"
         >
-          <el-form-item label="专题名称" prop="name">
+          <el-form-item label="单页名称" prop="name">
             <el-input
-              placeholder="请输入专题名称"
+              placeholder="请输入单页名称"
               v-model="projectInfo.name"
               style="width: 600px"
             ></el-input>
           </el-form-item>
-          <el-form-item label="专题描述" prop="describe">
+          <el-form-item label="单页描述" prop="describe">
             <el-input
               type="textarea"
               row="5"
-              placeholder="请输入文章描述"
+              placeholder="请输入单页描述"
               v-model.number="projectInfo.describe"
               style="width: 600px"
             ></el-input>
@@ -38,7 +38,7 @@
               <i class="el-icon-plus" v-if="!projectThumbnail"></i>
             </upload>
           </el-form-item>
-          <el-form-item label="内容详情" prop="content">
+          <el-form-item label="单页内容">
             <ueditor
               v-model="projectInfoContent"
               :config="config"
@@ -101,10 +101,7 @@ export default {
         initialFrameHeight: 420,
       },
       rules: {
-        name: [{ required: true, message: "请输入文章标题", trigger: "blur" }],
-        content: [
-          { required: true, message: "请输入商品详情", trigger: "change" },
-        ],
+        name: [{ required: true, message: "请输入单页名称", trigger: "blur" }],
       },
     };
   },
@@ -141,11 +138,6 @@ export default {
     },
   },
   created() {
-    // 判断七牛云
-    this.uploadData.imageMogr =
-      this.SYS.setup.edit_type === "1"
-        ? "?imageMogr2/auto-orient/thumbnail/750x/gravity/NorthWest/crop/750x750/blur/1x0/quality/75|imageslim"
-        : "";
     this.getData();
   },
   components: {
@@ -157,33 +149,6 @@ export default {
     markdownChange(html) {
       this.$set(this.projectInfo, "content", html);
     },
-    imgAdd(pos, $file) {
-      let formdata = new FormData();
-      if (this.projectInfo.contentImageId) {
-        formdata.mid = this.projectInfo.contentImageId._id;
-      }
-      formdata.append("file", $file);
-      Request.post({
-        url: "/api/admin/system/fileUpload",
-        params: formdata,
-      }).then((res) => {
-        console.log(res.data.fileName);
-        this.$refs.mavonEditor.$img2Url(pos, res.data.fileUrl);
-        this.$set(this.projectInfo, "contentImageId", res.data.mid);
-      });
-    },
-    imgDel(pos) {
-      const options = {
-        name: pos[0].replace(/^(.*)\/([^/]*)$/, "$2"),
-        mid: this.projectInfo.contentImageId,
-      };
-      Request.post({
-        url: "/api/admin/system/fileDelete",
-        params: options,
-      }).then((res) => {
-        this.$message.success("删除成功");
-      });
-    },
     getData() {
       const _state = this.$route.params.name || this.paramsName;
       if (_state === "update") {
@@ -191,7 +156,6 @@ export default {
           const result = res.data;
           this.$set(this.projectInfo, "name", result.name);
           this.$set(this.projectInfo, "describe", result.describe);
-
           // 初始化
           this.projectInfoContent =
             this.SYS.setup.edit_type === "2"
@@ -213,7 +177,6 @@ export default {
               "contentImageId",
               result.contentImageId._id
             );
-            this.$set(this.config, "imageMogr", this.imageMogr_750);
             this.$set(this.config, "mid", result.contentImageId._id);
             this.goodsThumbList = result.contentImageId.imgPath.map((item) => {
               return {
@@ -230,7 +193,6 @@ export default {
     upload_success(val) {
       this.$set(this.projectInfo, "thumbnailId", val.mid);
     },
-
     submitSave(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {

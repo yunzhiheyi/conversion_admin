@@ -74,6 +74,7 @@ export default {
           appid: "",
           appsecret: "",
         },
+        whiteUser: "",
         alipay: {
           mch_id: "",
           key: "",
@@ -105,6 +106,11 @@ export default {
       email: _data.setup.email || "",
       copyright: _data.setup.copyright || "",
     });
+    this.$set(
+      this.form,
+      "whiteUser",
+      _data.whiteUser && _data.whiteUser.join(",")
+    );
     this.$set(this.form, "qiniu", {
       access_key: _data.qiniu.access_key || "",
       secret_key: _data.qiniu.secret_key || "",
