@@ -1,41 +1,38 @@
 <template>
   <div class="app-container">
     <div class="table-form">
-      <el-form :inline="true" class="demo-form-inline">
+      <el-form :inline="true"
+        class="demo-form-inline">
         <el-form-item>
-          <el-input
-            type="input"
+          <el-input type="input"
             placeholder="请输入昵称"
             v-model="params.keyword"
-            clearable
-          ></el-input>
+            clearable></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button @click="search" type="primary">搜索</el-button>
+          <el-button @click="search"
+            type="primary">搜索</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="_list">
-      <el-table
-        highlight-current-row
+      <el-table highlight-current-row
         ref="tableRow"
         @selection-change="handleSelectionChange"
         :data="dataList"
         style="width: 100%"
-        v-loading.body="listLoading"
-      >
-        <el-table-column type="selection" width="55"> </el-table-column>
-        <el-table-column label="用户头像" width="180">
+        v-loading.body="listLoading">
+        <el-table-column type="selection"
+          width="55"> </el-table-column>
+        <el-table-column label="用户头像"
+          width="180">
           <template slot-scope="scope">
             <div class="user_info">
-              <span class="thumbnail"
-                ><img
-                  :src="
+              <span class="thumbnail"><img :src="
                     scope.row.avatar
                       ? scope.row.avatar
                       : 'https://cdn.maxbox.com.cn/upload/images/icon-avatar.png'
-                  "
-              /></span>
+                  " /></span>
             </div>
           </template>
         </el-table-column>
@@ -49,23 +46,31 @@
             {{ scope.row.mobile }}
           </template>
         </el-table-column> -->
-        <el-table-column label="是否关注公众号" align="center">
+        <el-table-column label="是否关注公众号"
+          align="center">
           <template slot-scope="scope">
             <el-tag :type="scope.row.isConcern ? 'success' : 'warning'">
               {{ scope.row.isConcern ? "是" : "否" }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="是否绑定微信" align="center">
+        <el-table-column label="是否绑定微信"
+          align="center">
           <template slot-scope="scope">
-            <el-tag
-              :type="
+            <el-tag :type="
                 scope.row.is_bind_wechat && scope.row.avatar
                   ? 'success'
                   : 'warning'
-              "
-            >
+              ">
               {{ scope.row.is_bind_wechat && scope.row.avatar ? "是" : "否" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="平台类型"
+          align="center">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.systemType ? 'success' : 'warning'">
+              {{ scope.row.systemType || "无" }}
             </el-tag>
           </template>
         </el-table-column>
@@ -86,61 +91,49 @@
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <to-link
-              :val="$route.meta.btnList.delete"
-              @to="handleDelete(scope.row)"
-            >
+            <to-link :val="$route.meta.btnList.delete"
+              @to="handleDelete(scope.row)">
               <el-button type="text">删除</el-button>
             </to-link>
-            <el-button type="text" @click="openCDrawerVisible(scope.row)"
-              >转换记录</el-button
-            >
-            <el-button type="text" @click="openSDrawerVisible(scope.row)"
-              >分享记录</el-button
-            >
+            <el-button type="text"
+              @click="openCDrawerVisible(scope.row)">转换记录</el-button>
+            <el-button type="text"
+              @click="openSDrawerVisible(scope.row)">分享记录</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <div class="pages">
       <div class="left">
-        <to-link :val="$route.meta.btnList.batchdelete" @to="handleAll">
-          <el-tooltip
-            class="item"
+        <to-link :val="$route.meta.btnList.batchdelete"
+          @to="handleAll">
+          <el-tooltip class="item"
             effect="dark"
             content="批量删除"
-            placement="top"
-          >
+            placement="top">
             <el-button type="danger">批量删除</el-button>
           </el-tooltip>
         </to-link>
       </div>
-      <div class="right" v-if="total > 0">
-        <el-pagination
-          @current-change="handleCurrentChange"
+      <div class="right"
+        v-if="total > 0">
+        <el-pagination @current-change="handleCurrentChange"
           background
           :page-size="limit"
           :current-page.sync="page"
           layout="total, prev, pager, next"
-          :total="total"
-        >
+          :total="total">
         </el-pagination>
       </div>
     </div>
-    <el-drawer
-      :append-to-body="true"
+    <el-drawer :append-to-body="true"
       :visible.sync="drawerVisible"
       :with-header="false"
-      size="60%"
-    >
-      <conversion-list
-        v-if="drawerVisible && drawerConversionVisible"
-        :user_id="user_id"
-      />
-      <share-list
-        v-if="drawerVisible && drawerShareVisible"
-        :invitee_code="invitee_code"
-      />
+      size="60%">
+      <conversion-list v-if="drawerVisible && drawerConversionVisible"
+        :user_id="user_id" />
+      <share-list v-if="drawerVisible && drawerShareVisible"
+        :invitee_code="invitee_code" />
     </el-drawer>
   </div>
 </template>

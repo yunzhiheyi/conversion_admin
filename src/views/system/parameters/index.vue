@@ -2,27 +2,27 @@
   <div class="app-container">
     <div class="wpm">
       <div class="tab_options">
-        <el-radio-group
-          style="margin-bottom: 10px"
+        <el-radio-group style="margin-bottom: 10px"
           v-model="tab_type"
-          @change="change_type_value"
-        >
+          @change="change_type_value">
           <template v-for="item in tab_options">
-            <el-radio-button
-              v-if="item.isShow"
+            <el-radio-button v-if="item.isShow"
               :key="item.value"
               border
-              :label="item.value"
-              >{{ item.label }}</el-radio-button
-            >
+              :label="item.value">{{ item.label }}</el-radio-button>
           </template>
         </el-radio-group>
         <div class="tab_content">
-          <setup v-model="form" v-if="tab_type == '1'"></setup>
-          <qiniu v-model="form" v-if="tab_type == '2'"></qiniu>
-          <wechat v-model="form" v-if="tab_type == '3'"></wechat>
-          <wechat-pay v-model="form" v-if="tab_type == '4'"></wechat-pay>
-          <alipay v-model="form" v-if="tab_type == '5'"></alipay>
+          <setup v-model="form"
+            v-if="tab_type == '1'"></setup>
+          <qiniu v-model="form"
+            v-if="tab_type == '2'"></qiniu>
+          <wechat v-model="form"
+            v-if="tab_type == '3'"></wechat>
+          <wechat-pay v-model="form"
+            v-if="tab_type == '4'"></wechat-pay>
+          <alipay v-model="form"
+            v-if="tab_type == '5'"></alipay>
         </div>
       </div>
     </div>
@@ -79,6 +79,7 @@ export default {
           mch_id: "",
           key: "",
         },
+        isIosAudit: "",
       },
     };
   },
@@ -111,12 +112,14 @@ export default {
       "whiteUser",
       _data.whiteUser && _data.whiteUser.join(",")
     );
+    this.$set(this.form, "isIosAudit", _data.isIosAudit);
     this.$set(this.form, "qiniu", {
       access_key: _data.qiniu.access_key || "",
       secret_key: _data.qiniu.secret_key || "",
       bucket: _data.qiniu.bucket || "",
       bucket_url: _data.qiniu.bucket_url || "",
     });
+
     this.$set(this.form, "wechatPay", {
       mch_id: _data.wechatPay.mch_id || "",
       key: _data.wechatPay.key || "",

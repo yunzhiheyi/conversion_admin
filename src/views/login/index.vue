@@ -1,17 +1,15 @@
 <template>
   <div class="login-container">
-    <el-form
-      autoComplete="on"
+    <el-form autoComplete="on"
       :model="loginForm"
       :rules="loginRules"
       ref="loginForm"
       label-position="left"
       label-width="0px"
-      class="card-box login-form"
-    >
+      class="card-box login-form">
       <h3 class="title">
-        <img src="/images/logo.png" width="60" /><span>Y</span><span>U</span
-        ><span>N</span><span>Z</span><span>H</span><span>I</span>
+        <img src="/images/logo.png"
+          width="60" />
       </h3>
       <el-form-item prop="username">
         <div class="input">
@@ -19,13 +17,11 @@
             <svg-icon icon-class="admin" />
           </span>
           <div class="input-text">
-            <el-input
-              name="username"
+            <el-input name="username"
               type="text"
               v-model="loginForm.username"
               autoComplete="on"
-              placeholder="请输入用户名"
-            />
+              placeholder="请输入用户名" />
           </div>
         </div>
       </el-form-item>
@@ -35,18 +31,17 @@
             <svg-icon icon-class="password"></svg-icon>
           </span>
           <div class="input-text">
-            <el-input
-              name="password"
+            <el-input name="password"
               :type="pwdType"
               @keyup.enter.native="handleLogin"
               v-model="loginForm.password"
               autoComplete="on"
-              placeholder="请输入密码"
-            ></el-input>
+              placeholder="请输入密码"></el-input>
           </div>
-          <span class="show-pwd" @click="showPwd"
-            ><svg-icon icon-class="eye"
-          /></span>
+          <span class="show-pwd"
+            @click="showPwd">
+            <svg-icon icon-class="eye" />
+          </span>
         </div>
       </el-form-item>
       <el-form-item prop="verifyCode">
@@ -55,33 +50,27 @@
             <svg-icon icon-class="verifyCode"></svg-icon>
           </span>
           <div class="verifyCode">
-            <el-input
-              size="small"
+            <el-input size="small"
               @keyup.enter.native="handleLogin"
               v-model="loginForm.verifyCode"
               auto-complete="off"
-              placeholder="验证码"
-            >
+              placeholder="验证码">
             </el-input>
           </div>
-          <div class="login-code" v-if="verifyCodeImage">
-            <div
-              class="login-code-img"
+          <div class="login-code"
+            v-if="verifyCodeImage">
+            <div class="login-code-img"
               @click="refreshCode"
-              v-html="verifyCodeImage"
-            ></div>
+              v-html="verifyCodeImage"></div>
           </div>
         </div>
       </el-form-item>
       <el-form-item>
-        <el-button
-          type="primary"
+        <el-button type="primary"
           style="width: 100%"
           :loading="loading"
           size="medium"
-          @click.native.prevent="handleLogin"
-          >登录</el-button
-        >
+          @click.native.prevent="handleLogin">登录</el-button>
       </el-form-item>
       <div class="copyright">
         <span>©2018-2022</span>成都市云智合一科技有限公司

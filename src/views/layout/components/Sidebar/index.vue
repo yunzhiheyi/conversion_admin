@@ -1,45 +1,40 @@
 <template>
   <div class="_sidebar">
-    <div class="logo" @click="handleIndex">
-      <img src="/images/logo.png" width="30" /><span class="_logo_zi"
-        ><span>Y</span><span>U</span><span>N</span><span>Z</span><span>H</span
-        ><span>I</span></span
-      >
+    <div class="logo"
+      @click="handleIndex">
+      <img src="/images/logo.png"
+        width="30" /><span class="_logo_zi"><span>云</span><span>智</span><span>合</span><span>一</span></span>
+
     </div>
     <scroll-bar>
       <!-- {{ sideBarMenu }} -->
-      <el-menu
-        class="sidebar-menu"
+      <el-menu class="sidebar-menu"
         @select="handleLink"
         background-color="#23313d"
         text-color="#fff"
         active-text-color="#fff"
         unique-opened
         :collapse="isCollapse"
-        :default-active="currentPageName"
-      >
+        :default-active="currentPageName">
         <template v-for="(menu, key) in sideBarMenu">
           <template v-if="menu.isShow == '1'">
-            <div
-              :class="{
+            <div :class="{
                 _sidebar_none: menu.children && menu.children.length < 1,
               }"
               :key="key"
-              v-if="!menu.children"
-            >
+              v-if="!menu.children">
               <el-menu-item :index="menuIndex(menu)">
                 <label class="menu-icon">
-                  <svg-icon v-if="menu.icon" :icon-class="menu.icon"></svg-icon>
+                  <svg-icon v-if="menu.icon"
+                    :icon-class="menu.icon"></svg-icon>
                 </label>
                 <span slot="title">{{ menu.name }}</span>
               </el-menu-item>
             </div>
             <!-- {{ menu.children }} -->
-            <sidebar-item
-              :menu="menu"
+            <sidebar-item :menu="menu"
               :key="key"
-              v-if="menu.children && menu.children.length >= 1"
-            ></sidebar-item>
+              v-if="menu.children && menu.children.length >= 1"></sidebar-item>
           </template>
         </template>
       </el-menu>
@@ -102,7 +97,7 @@ export default {
       vertical-align: -3px;
     }
     span {
-      margin: 2px;
+      margin: 2px 1px;
     }
     ._logo_zi {
       margin-left: 10px;
